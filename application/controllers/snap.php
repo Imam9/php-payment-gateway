@@ -27,6 +27,7 @@ class Snap extends CI_Controller {
 		$this->load->library('midtrans');
 		$this->midtrans->config($params);
 		$this->load->helper('url');	
+		
     }
 
     public function index()
@@ -129,10 +130,85 @@ class Snap extends CI_Controller {
 
     public function finish()
     {
-    	$result = json_decode($this->input->post('result_data'));
-    	echo 'RESULT <br><pre>';
-    	var_dump($result);
-    	echo '</pre>' ;
+		$result = json_decode($this->input->post('result_data'));
+		// print_r($result);
+
+		if(isset($result->va_numbers[0]->bank)){
+			$bank = $result->va_numbers[0]->bank;
+		}else{
+			$bank = "-";
+		}
+
+		if(isset($result->va_numbers[0]->va_number)){
+			$va_number = $result->va_numbers[0]->va_number;
+		}else{
+			$va_number = "-";
+		}
+
+		if(isset($result->bca_va_number)){
+			$bca_va_number = $result->bca_va_number;
+		}else{
+			$bca_va_number = "-";
+		}
+
+		if(isset($result->bill_key)){
+			$bill_key = $result->bill_key;
+		}else{
+			$bill_key = "-";
+		}
+
+		if(isset($result->biller_code)){
+			$biller_code = $result->biller_code;
+		}else{
+			$biller_code = "-";
+		}
+
+		if(isset($result->permata_va_number)){
+			$permata_va_number = $result->permata_va_number;
+		}else{
+			$permata_va_number = "-";
+		}
+
+		if(isset($result->fraud_status)){
+			$fraud_status = $result->fraud_status;
+		}else{
+			$fraud_status = "-";
+		}
+
+		$data = [
+			'status_code' => $result->status_code,
+			'status_message' => $result->status_message,
+			'transaction_id' => $result->transaction_id,
+			'order_id' => $result->order_id,
+			'gross_amount' => $result->gross_amount,
+			'payment_type' => $result->payment_type,
+			'transaction_time' => $result->transaction_time,
+			'transaction_status' => $result->transaction_status,
+			'fraud_status' => $result->fraud_status,
+			'pdf_url' => $result->pdf_url,
+			'finish_redirect_url' => $result->finish_redirect_url,
+			//tiap bank beda beda
+			'permata_va_number' => $permata_va_number,
+			'bank' => $bank,
+			'bill_key' => $bill_key,
+			'va_number' => $va_number,
+			'biller_code' => $biller_code,
+			'bca_va_number' => $bca_va_number
+
+		];
+
+		$return = $this->snapmodel->insert($data,'tbl_requesttransaksi');
+		if($return){
+			echo "request pembayaran berhasil dilakukan segera selesaikan transaksi";
+		}else{
+			echo "request pembayaran gagal dilkukan";
+		}
+
+		$this->data['finish'] = json_decode($this->input->post('result_data'));
+		$this->load->view('konfirmasi', $this->data);
+    	// echo 'RESULT <br><pre>';
+    	// var_dump($result);
+    	// echo '</pre>' ;
 
 	}
 	
